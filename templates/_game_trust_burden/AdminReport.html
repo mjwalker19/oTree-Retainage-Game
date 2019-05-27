@@ -1,0 +1,91 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-5">
+        <h4>Session Details:</h4>
+<p>Treatment: {{ treatment }}</p>
+<p>Retention: {{ retention }}</p>
+<p>Seller Cost of Low Quality: {{ cost_low }}</p>
+<p>Seller Cost of High Quality: {{ cost_high }}</p>
+<p>Buyer Value of Low Quality: {{ value_low }}</p>
+<p>Buyer Value of High Quality: {{ value_high }}</p>
+<p>Player Endowment per round: {{ Constants.endowment }}</p>
+<p>Number of Rounds: {{ Constants.num_rounds }}</p>
+        </div>
+    <div class="col-sm-7" style="text-align:center">
+        <h4>Dashboard</h4>
+        <table class="table" style="width:500px;text-align:center">
+
+        <tr>
+            <th></th>
+            <th>Average</th>
+            <th>Minimum</th>
+            <th>Maximum</th>
+        </tr>
+
+        <tr>
+            <td>Buyer Payoff</td>
+            <td>{{ avg_buyer_payoff }}</td>
+            <td>{{ min_buyer_payoff }}</td>
+            <td>{{ max_buyer_payoff }}</td>
+        </tr>
+
+        <tr>
+            <td>Seller Payoff</td>
+            <td>{{ avg_seller_payoff }}</td>
+            <td>{{ min_seller_payoff }}</td>
+            <td>{{ max_seller_payoff }}</td>
+        </tr>
+
+        <tr>
+            <td>Buyer Cumul Payoff</td>
+            <td>{{ avg_buyer_cumul_payoff }}</td>
+            <td style="color:red">{{ min_buyer_cumul_payoff }}</td>
+            <td>{{ max_buyer_cumul_payoff }}</td>
+        </tr>
+
+        <tr>
+            <td>Seller Cumul Payoff</td>
+            <td>{{ avg_seller_cumul_payoff }}</td>
+            <td style="color:red">{{ min_seller_cumul_payoff }}</td>
+            <td>{{ max_seller_cumul_payoff }}</td>
+        </tr>
+
+        </table>
+
+        <h4>Outcomes</h4>
+        <table class="table" style="width:500px;text-align:center">
+
+        <tr>
+            <th>Measure</th>
+            <th>Average</th>
+        </tr>
+
+        <tr>
+            <td>Seller Bids</td>
+            <td>{{ avg_bid }}</td>
+        </tr>
+
+        <tr>
+            <td>Buyer Trade</td>
+            <td>{% if avg_buyer_trade == '' %} {% else %}{{ avg_buyer_trade|floatformat }}% {% endif %}</td>
+        </tr>
+
+        <tr>
+            <td>Seller High Quality</td>
+            <td>{% if avg_seller_quality == '' %} {% else %}{{ avg_seller_quality|floatformat }}% {% endif %}</td>
+        </tr>
+
+        <tr>
+            <td>Buyer Transfer <br> (% retention money)</td>
+            <td>{% if avg_buyer_transfer == '' %} {% else %}{{ avg_buyer_transfer|floatformat }}% {% endif %}</td>
+        </tr>
+
+        <tr>
+            <td>Seller Agree</td>
+            <td>{% if avg_seller_accept == '' %} {% else %}{{ avg_seller_accept|floatformat }}% {% endif %}</td>
+        </tr>
+
+        </table>
+    </div>
+  </div>
+</div>

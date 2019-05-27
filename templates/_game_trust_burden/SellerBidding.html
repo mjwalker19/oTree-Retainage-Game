@@ -1,0 +1,81 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block styles %}
+
+    <style>
+        .otree-form-errors {
+            display: none;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+    <h4 style="text-align: center"> Round {{ subsession.round_number }} out of {{ Constants.num_rounds }} </h4>
+        <div><p style="text-align: center; color: darkblue">Time left to make your decision: <span id="time">00:40</span></p></div>
+      <h4>You are a Seller. <br> Please make your Bidding Decision.</h4>
+      <p>Your bid can be any integer from {{ cost_low }} to {{ value_high }}.</p>
+        {% formfield player.seller_bid label="Enter bid" %}
+        <p><input class="btn btn-primary btn-large btn-primary next-button" type="submit" value="Submit bid"></p>
+        <div>
+            <button name="seller_exit" value="True" class="btn btn-primary btn-large">
+                Exit without bid
+            </button>
+        </div>
+        <br>
+        {{ form.seller_exit.errors }}
+    </div>
+    <div class="col-sm-6" style="text-align:center">
+        <br>
+        <br>
+        <br>
+      {% include Constants.instructions_template %}
+    </div>
+  </div>
+</div>
+    {% include Constants.history_table %}
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+    function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            timer = 0;
+            document.getElementById("time").style.color = 'red';
+                }
+                    }, 1000);
+                        }
+
+window.onload = function () {
+    var halfMinute = 20 * 2,
+        display = document.querySelector('#time');
+    startTimer(halfMinute, display);
+};
+    </script>
+
+    <script>
+    setTimeout(
+    function () {
+        alert("Time is up! Please decide now.");
+    },
+    43*1000 // 43 seconds to allow for lag
+);
+    </script>
+
+{% endblock %}

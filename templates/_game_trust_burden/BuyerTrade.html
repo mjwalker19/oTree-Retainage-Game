@@ -1,0 +1,98 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+   <div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <h4 style="text-align: center"> Round {{ subsession.round_number }} out of {{ Constants.num_rounds }} </h4>
+      <div><p style="text-align: center; color: darkblue">Time left to make your decision: <span id="time">00:40</span></p></div>
+
+        <h4>You are a Buyer. <br> Please make your Trading Decision.</h4>
+        <br>
+
+         <table class="table" style="width:350px;text-align:center">
+
+            <tr>
+                <th>Winning Bid:</th>
+                <th>{{ group.winning_bid|floatformat }}</th>
+            </tr>
+
+            {% if treatment == 1 or treatment == 1.5 or treatment == 3 %}
+            <tr>
+                <th>Initial Payment:</th>
+                <th>{{ group.initial_payment|floatformat:2 }}</th>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <th style="font-weight: normal">Losing Bid:</th>
+                <th style="font-weight: normal">{% if group.bids_submitted > 1 %}{{ group.losing_bid|floatformat }}{% else %}None{% endif %}</th>
+            </tr>
+
+            </table>
+
+        <p align="center"><strong>Do you wish to trade?</strong></p>
+
+        <div align="center">
+            <button name="buyer_accept" value="True" class="btn btn-primary btn-large">
+                Yes
+            </button>
+            <button name="buyer_accept" value="False" class="btn btn-primary btn-large">
+                No
+            </button>
+
+            </div>
+        <br>
+        {{ form.buyer_accept.errors }}
+        </div>
+    <div class="col-sm-6" style="text-align:center">
+        <br>
+        <br>
+        <br>
+      {% include Constants.instructions_template %}
+    </div>
+  </div>
+</div>
+    {% include Constants.history_table %}
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+    function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            timer = 0;
+            document.getElementById("time").style.color = 'red';
+                }
+                    }, 1000);
+                        }
+
+window.onload = function () {
+    var halfMinute = 20 * 2,
+        display = document.querySelector('#time');
+    startTimer(halfMinute, display);
+};
+    </script>
+
+    <script>
+    setTimeout(
+    function () {
+        alert("Time is up! Please decide now.");
+    },
+    43*1000 // 43 seconds to allow for lag
+);
+    </script>
+
+{% endblock %}

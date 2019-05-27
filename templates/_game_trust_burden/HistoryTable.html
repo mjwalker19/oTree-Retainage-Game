@@ -1,0 +1,94 @@
+{% load otree %}
+
+<table class="table" style="text-align: center">
+
+        <tr>
+            <th>Round</th>
+            <th>Winning Bid</th>
+            <th>Losing Bid</th>
+            <th>Trade</th>
+            {% if treatment == 1 or treatment == 1.5 or treatment == 3 %}
+            <th>Initial Payment</th>
+            {% endif %}
+            <th>Quality</th>
+            {% if treatment > 0 %}
+            <th>Deferred Payment</th>
+            {% endif %}
+            {% if treatment > 2 %}
+            <th>Seller Response</th>
+            {% endif %}
+            <th>Your Profit</th>
+            <th>{% if player.role == 'buyer' %} Seller Profit {% else %} Buyer Profit {% endif %}</th>
+        </tr>
+        {% for p in player_in_all_rounds %}
+            <tr>
+                <td>{{ p.round_number }}</td>
+                <td>{% if p.show_bid == False %}
+                    {% elif p.group.no_bid == True %} None
+                    {% elif p.role == 'buyer' %} {{ p.group.winning_bid|floatformat }}
+                    {% elif p.role == 'seller' %}{{ p.group.winning_bid|floatformat }}{% if p.is_winner == True %}<sup>*</sup>{% endif %}
+                    {% endif %}</td>
+                <td>{% if p.show_bid == False %}
+                    {% elif p.group.no_bid == True %} None
+                    {% elif p.group.bids_submitted == 2 %}
+                    {{ p.group.losing_bid|floatformat }}{% if p.is_winner == False %}<sup>*</sup>{% endif %}
+                    {% else %}None
+                    {% endif %}</td>
+                <td>{% if p.show_trade == False %}
+                    {% elif p.group.buyer_accept == True and p.role == 'buyer' %} Yes
+                    {% elif p.group.buyer_accept == False and p.role == 'buyer' %} No
+                    {% elif p.group.no_bid %} No
+                    {% elif p.group.buyer_accept == True and p.role == 'seller' %} Yes
+                    {% elif p.group.buyer_accept == False and p.role == 'seller' %} No
+                    {% else %}
+                    {% endif %}</td>
+                {% if treatment == 1 or treatment == 1.5 or treatment == 3 %}
+                <td>{% if p.show_IP == False %}
+                    {% elif p.group.buyer_accept == True %}
+                    {{ p.group.initial_payment|floatformat:2 }}
+                    {% else %} {% endif %}</td>
+                {% endif %}
+                <td>{% if p.show_quality == False %}
+                    {% elif p.group.buyer_accept == True %}
+                        {% if p.group.seller_quality == 0 %} Low
+                        {% elif p.group.seller_quality == 1 %} High
+                        {% endif %}
+                    {% else %} {% endif %}</td>
+                {% if treatment > 0 %}
+                <td>{% if p.show_DP == False %}
+                    {% elif p.group.buyer_accept == True %}
+                    {{ p.group.buyer_transfer|floatformat:2 }}
+                    {% else %} {% endif %}</td>
+                {% endif %}
+                {% if treatment > 2 %}
+                <td>{% if p.show_response == False %}
+                    {% elif p.group.buyer_accept == True %}
+                        {% if p.group.seller_accept == True %} Agree
+                        {% elif p.group.seller_accept == False %} Dispute
+                        {% endif %}
+                    {% else %} {% endif %}</td>
+                {% endif %}
+                <td>{% if p.show_payoff == False %}
+                {% else %}{{ p.payoff|floatformat:2 }} {% endif %}</td>
+                <td>{% if p.show_payoff == False %}
+                {% elif p.role == 'buyer' %}{{ p.group.seller_payoff|floatformat:2 }}
+                {% elif p.role == 'seller' %}{{ p.group.buyer_payoff|floatformat:2 }}
+                {% else %} {% endif %}</td>
+            </tr>
+        {% endfor %}
+        {% if player.role == 'seller' %}
+        <tr>
+            <td colspan="4"><sup>*</sup>Your Bid</td>
+            {% if treatment == 0 %}
+                <td colspan="3"></td>
+                {% elif treatment == 1 or treatment == 1.5 or treatment == 4 %}
+                <td colspan="5"></td>
+                {% elif treatment == 2 %}
+                <td colspan="4"></td>
+                {% elif treatment == 3 %}
+                <td colspan="6"></td>
+                {% endif %}
+        </tr>
+        {% endif %}
+
+    </table>

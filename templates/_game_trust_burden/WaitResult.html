@@ -1,0 +1,42 @@
+{% extends 'otree/WaitPage.html' %}
+{% load static otree %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+        <h4 style="text-align: center"> Round {{ subsession.round_number }} out of {{ Constants.num_rounds }} </h4>
+        <h5 style="text-align: center">
+
+                {% if player.seller_exit == True %}
+            <p><strong>You elected not to participate in the current round’s auction.</strong></p>
+                {% if group.no_bid == True %}
+            <p>No bid was submitted this round.</p>
+                {% else %}
+            <p>The winning bid was: {{ group.winning_bid|floatformat }}.</p>
+                {% endif %}
+            <p>Please wait for the round results.</p>
+
+                {% elif player.is_winner == False %}
+                <p><strong>You did not win the auction.</strong></p>
+                <p>The winning bid was: {{ group.winning_bid|floatformat }}.</p>
+                <p>Your bid was: {{ group.losing_bid|floatformat }}.</p>
+                <p>Please wait for the round results.</p>
+
+                {% elif player.role == 'buyer' and group.no_bid == True %}
+            <p><strong>You are a Buyer. No bid was submitted this round.</strong></p>
+            <p>Please wait for the round results.</p>
+                {% elif player.role == 'buyer' and group.buyer_accept == False %}
+                    <p>You are a Buyer. You rejected trade this round.</p>
+                    <p>Please wait for the round results.</p>
+                {% elif player.role == 'seller' and group.buyer_accept == False %}
+                    <p>You are a Seller. The Buyer rejected trade this round.</p>
+                    <p>Please wait for the round results.</p>
+                {% else %}<p>You are a {% if player.role == 'buyer' %}Buyer{% else %}Seller{% endif %}.
+                    Please wait while the other players make decisions.</p>
+                {% endif %} </h5>
+
+      {% include Constants.history_table %}
+
+    {% include Constants.instructions_template %}
+
+{% endblock %}

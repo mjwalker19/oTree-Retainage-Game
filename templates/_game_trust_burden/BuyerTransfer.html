@@ -1,0 +1,129 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <h4 style="text-align: center"> Round {{ subsession.round_number }} out of {{ Constants.num_rounds }} </h4>
+      <div><p style="text-align: center; color: darkblue">Time left to make your decision: <span id="time">00:40</span></p></div>
+      <h4>You are a Buyer. <br> Please make your Deferred Payment Decision.</h4>
+        <br>
+        <p>The seller delivered <strong>{{ quality }} Quality</strong>.
+        <p>You value the product at {{ group.get_value|floatformat }}.</p>
+        <p>The Seller incurred the cost of {{ group.get_cost|floatformat }}.</p>
+        {% if treatment == 1 or treatment == 1.5 or treatment == 3 %}
+        <p>Initial payment was: {{ group.initial_payment|floatformat:2 }}.</p>
+        {% endif %}
+        <p>Deferred payment can be from zero to {{ group.retention_money|floatformat:2 }}.</p>
+        {% formfield group.buyer_transfer label="Adjust the Slider to the Deferred Payment you will pay the Seller" %}
+        <p><input class="btn btn-primary btn-large btn-primary next-button" type="submit" value="Submit"></p>
+
+            <p>Below you can view profits for the selected deferred payment{% if treatment > 2 %} and possible seller
+                responses{% endif %}.</p>
+
+        <table class="table" style="text-align:center">
+
+            {% if treatment > 2 %}
+
+            <tr>
+                <th></th>
+                <th style="font-weight: normal">Seller Agree</th>
+                <th style="font-weight: normal">Seller Dispute</th>
+            </tr>
+
+        {% endif %}
+
+            <tr>
+                <td>{% if player.role == 'buyer' %} Your Profit {% else %} Buyer Profit {% endif %}</td>
+                <td><div id="BProfit"></div></td>
+            {% if treatment > 2 %}
+                <td><div id="RBProfit"></div></td>
+                {% endif %}
+            </tr>
+
+            <tr>
+                <td>{% if player.role == 'seller' %} Your Profit {% else %} Seller Profit {% endif %}</td>
+                <td><div id="SProfit"></div></td>
+            {% if treatment > 2 %}
+                <td><div id="RSProfit"></div></td>
+                {% endif %}
+            </tr>
+
+        </table>
+
+    </div>
+    <div class="col-sm-6" style="text-align:center">
+        <br>
+        <br>
+        <br>
+      {% include Constants.instructions_template %}
+    </div>
+  </div>
+</div>
+    {% include Constants.history_table %}
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+
+        $('input[name=buyer_transfer]').on('change', function () {
+        var entry = parseFloat($(this).val());
+        var buyer_value = {{ value|json }};
+        var seller_cost = {{ cost|json }};
+        var initial_payment = {{ group.initial_payment|json }};
+
+        BProfit = parseFloat(buyer_value) - parseFloat(initial_payment) - parseFloat(entry);
+        document.getElementById("BProfit").innerText = BProfit;
+
+        SProfit = parseFloat(initial_payment) + parseFloat(entry) - parseFloat(seller_cost);
+        document.getElementById("SProfit").innerText = SProfit;
+
+        RBProfit = - parseFloat(initial_payment);
+        document.getElementById("RBProfit").innerText = RBProfit;
+
+        RSProfit = parseFloat(initial_payment) - parseFloat(seller_cost);
+        document.getElementById("RSProfit").innerText = RSProfit;
+
+        });
+
+    </script>
+
+    <script>
+    function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            timer = 0;
+            document.getElementById("time").style.color = 'red';
+                }
+                    }, 1000);
+                        }
+
+window.onload = function () {
+    var halfMinute = 20 * 2,
+        display = document.querySelector('#time');
+    startTimer(halfMinute, display);
+};
+    </script>
+
+    <script>
+    setTimeout(
+    function () {
+        alert("Time is up! Please decide now.");
+    },
+    43*1000 // 43 seconds to allow for lag
+);
+    </script>
+
+{% endblock %}

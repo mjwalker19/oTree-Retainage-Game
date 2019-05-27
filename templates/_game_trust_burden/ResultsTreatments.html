@@ -1,0 +1,72 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <h4 style="text-align: center"> Round {{ subsession.round_number }} out of {{ Constants.num_rounds }} </h4>
+      <br>
+      <h4>Results</h4>
+        <br>
+        {% if group.bids_submitted == 1 %}
+        <p>{{ group.bids_submitted }} seller submitted a bid this round</p>
+        {% else %}
+        <p>{{ group.bids_submitted }} sellers submitted bids this round</p>
+        {% endif %}
+        {% if group.bids_submitted > 0 %}
+        <p>The winning bid was: {{ group.winning_bid|floatformat }}</p>
+            {% if group.bids_submitted > 1 %}
+        <p>The losing bid was: {{ group.losing_bid|floatformat }}</p>
+                {% endif %}
+        {% if group.buyer_accept is True %}
+            {% if treatment == 1 or treatment == 1.5 or treatment == 3 %}
+        <p>The Buyer decided to trade and paid Initial Payment of {{ group.initial_payment|floatformat:2 }}</p>
+                {% else %}
+        <p>The Buyer decided to trade</p>
+                {% endif %}
+        <p>The Seller delivered {{ quality }} Quality</p>
+        <p>The Buyer paid <strong>Deferred Payment of {{ group.buyer_transfer|floatformat:2 }}</strong></p>
+        {% elif group.buyer_accept is False %}
+        <p>The Buyer decided not to trade</p>
+        {% endif %}
+            <br>
+
+        <p>You are: {% if player.role == 'buyer' %} Buyer
+        {% elif player.is_winner == True %} Winning Seller
+        {% elif player.seller_exit == True %} Non-participating Seller
+        {% elif player.is_winner == False %} Losing Seller{% endif %}</p>
+
+        {% if group.buyer_accept is True %}
+            <p>Buyer’s profit: {{ group.buyer_payoff|floatformat:2 }}</p>
+            <p>Winning Seller’s Profit: {{ group.seller_payoff|floatformat:2 }}</p>
+            {% if group.bids_submitted < 2 %}
+            <p>Non-participating Seller’s profit: 0.00</p>
+            {% else %}
+            <p>Losing Seller’s profit: 0.00</p>
+            {% endif %}
+        {% elif group.buyer_accept is False %}
+            <p>Profit of all parties: 0.00</p>
+            {% endif %}
+
+        {% else %}
+         <p>You are: {% if player.role == 'buyer' %} Buyer {% else %} Seller {% endif %}</p>
+            <p>Profit of all parties: 0.00</p>
+        {% endif %}
+
+        <p><strong>Please click the next button to continue.</strong></p>
+
+        {% next_button %}
+
+    </div>
+    <div class="col-sm-6" style="text-align:center">
+        <br>
+        <br>
+        <br>
+      {% include Constants.instructions_template %}
+    </div>
+  </div>
+</div>
+    {% include Constants.history_table %}
+{% endblock %}
