@@ -96,35 +96,6 @@ class BuyerTransfer(Page):
                         'cost': self.session.vars['costs'][Constants.qualities.index(self.group.seller_quality)]})
         return context
 
-class SellerAccept(Page):
-    form_model = 'group'
-    form_fields = ['seller_accept']
-
-    def is_displayed(self):
-        if self.session.vars['treatment'] > 2 and self.group.buyer_accept and self.player.is_winner:
-            return True
-        else:
-            return False
-
-    def before_next_page(self):
-        print('@@@ stage 5 before next page ')
-        self.player.show_DP = True
-        print('@@@ winning seller show DP')
-        self.player.show_response = True
-        print('@@@ winning seller show response')
-
-    def vars_for_template(self):
-        context = self.player.vars_for_template()
-        context.update({'not_transferred': self.group.retention_money - self.group.buyer_transfer,
-                        'BProfitA': self.session.vars['values'][Constants.qualities.index(self.group.seller_quality)] -
-                        self.group.initial_payment - self.group.buyer_transfer,
-                        'BProfitR': - self.group.initial_payment,
-                        'SProfitA': self.group.initial_payment + self.group.buyer_transfer -
-                        self.session.vars['costs'][Constants.qualities.index(self.group.seller_quality)],
-                        'SProfitR': self.group.initial_payment -
-                        self.session.vars['costs'][Constants.qualities.index(self.group.seller_quality)]})
-        return context
-
 class ResultsControl(Page):
 
     timeout_seconds = 25
@@ -278,7 +249,6 @@ page_sequence = [
     WaitQuality,
     BuyerTransfer,
     WaitPayment,
-    SellerAccept,
     WaitResult,
     ResultsControl,
     ResultsTreatments,

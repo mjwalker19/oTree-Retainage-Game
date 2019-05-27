@@ -11,11 +11,7 @@ author = 'Matthew Walker. Contact at matthew.j.walker@durham.ac.uk'
 doc = """
 In this game, two sellers compete at a first-price procurement auction to sell one unit of an investment good to a 
 randomly matched buyer. If the buyer accepts trade at the winning auction price, the seller chooses a quality level. 
-After delivery, the buyer observes the quality level and finalizes payment. <br/>  
-<br/> 
-Treatments vary according to: <br/> 
-(i)	 the proportion of the endogenously determined auction price that is binding for payment; and
-(ii) the side of the market that holds residual control rights to the investment good.
+After delivery, the buyer observes the quality level and finalizes payment. <br/> 
  
 """
 
@@ -95,92 +91,6 @@ class Subsession(BaseSubsession):
                     p.participant.vars['type'] = 2
                     print('@@@ stored in dictionary', p.participant.vars['type'])
 
-    def vars_for_admin(self):
-        sellers = [p for p in self.get_players() if p.role() == 'seller']
-        seller_payoffs = [p.payoff for p in sellers]
-        seller_cumul_payoffs = [p.cumulative_payoff for p in sellers]
-        buyers = [p for p in self.get_players() if p.role() == 'buyer']
-        buyer_payoffs = [p.payoff for p in buyers]
-        buyer_cumul_payoffs = [p.cumulative_payoff for p in buyers]
-
-        return {'treatment': self.session.vars['treatment'],
-                'retention': self.session.vars['retention'],
-                'cost_low': self.session.vars['costs'][0],
-                'cost_high': self.session.vars['costs'][1],
-                'value_low': self.session.vars['values'][0],
-                'value_high': self.session.vars['values'][1],
-                'avg_buyer_payoff': sum(buyer_payoffs) / len(buyer_payoffs),
-                'avg_seller_payoff': sum(seller_payoffs) / len(seller_payoffs),
-                'min_buyer_payoff': min(buyer_payoffs),
-                'max_buyer_payoff': max(buyer_payoffs),
-                'min_seller_payoff': min(seller_payoffs),
-                'max_seller_payoff': max(seller_payoffs),
-                'avg_buyer_cumul_payoff': sum(buyer_cumul_payoffs) / len(buyer_cumul_payoffs),
-                'avg_seller_cumul_payoff': sum(seller_cumul_payoffs) / len(seller_cumul_payoffs),
-                'min_seller_cumul_payoff': min(seller_cumul_payoffs),
-                'max_seller_cumul_payoff': max(seller_cumul_payoffs),
-                'min_buyer_cumul_payoff': min(buyer_cumul_payoffs),
-                'max_buyer_cumul_payoff': max(buyer_cumul_payoffs),
-                'avg_bid': '',
-                'avg_buyer_trade': '',
-                'avg_seller_quality': '',
-                'avg_buyer_transfer': '',
-                'avg_seller_accept': ''
-                }
-
-    def vars_for_admin_report(self):
-        # Each round is a subsession
-        seller_bids = [p.seller_bid for p in self.get_players() if p.seller_bid != None and p.seller_bid != 999]
-        buyer_accepts = [g.buyer_accept for g in self.get_groups() if g.buyer_accept != None]
-        seller_qualities = [g.seller_quality for g in self.get_groups() if g.seller_quality != None]
-        buyer_transfers = [g.buyer_transfer_pct for g in self.get_groups() if g.buyer_transfer_pct != None]
-        seller_accepts = [g.seller_accept for g in self.get_groups() if g.seller_accept != None]
-
-        context = self.vars_for_admin()
-        if buyer_accepts and self.session.vars['treatment'] == 0:
-            if seller_qualities:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100,
-                                'avg_seller_quality': (sum(seller_qualities) / len(seller_qualities))*100
-                                })
-            else:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100
-                                })
-            return context
-
-        elif buyer_accepts and (self.session.vars['treatment'] == 1 or self.session.vars['treatment'] == 1.5 or self.session.vars['treatment'] == 2):
-            if buyer_transfers:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100,
-                                'avg_seller_quality': (sum(seller_qualities) / len(seller_qualities))*100,
-                                'avg_buyer_transfer': (sum(buyer_transfers) / len(buyer_transfers))*100
-                                })
-            else:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100,
-                                })
-            return context
-
-        elif buyer_accepts and self.session.vars['treatment'] > 2:
-            if seller_accepts:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100,
-                                'avg_seller_quality': (sum(seller_qualities) / len(seller_qualities))*100,
-                                'avg_buyer_transfer': (sum(buyer_transfers) / len(buyer_transfers))*100,
-                                'avg_seller_accept': (sum(seller_accepts) / len(seller_accepts))*100
-                                })
-            else:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                'avg_buyer_trade': (sum(buyer_accepts) / len(buyer_accepts))*100
-                                })
-            return context
-
-        elif seller_bids:
-                context.update({'avg_bid': sum(seller_bids) / len(seller_bids),
-                                })
-        return context
-
 
 class Group(BaseGroup):
     winning_bid = models.FloatField()
@@ -211,13 +121,6 @@ class Group(BaseGroup):
     buyer_transfer = models.FloatField(
     min=0, doc="""Amount of retention money the buyer transfers to the seller as deferred payment""",
     widget=widgets.Slider(attrs={'step': '0.25'}))
-
-    seller_accept = models.BooleanField(
-        doc="""Whether seller agrees or disputes retention payment decision""",
-        choices=[
-            (True, 'Accept'),
-            (False, 'Reject'),
-        ])
 
     def set_winner(self):
         bidders = self.get_players()
@@ -272,27 +175,18 @@ class Group(BaseGroup):
         return cost
 
     def get_value(self):
-        if self.seller_accept is not False:
-            val = self.session.vars['values'][Constants.qualities.index(self.seller_quality)]
-            print('@@@ val a', val)
-            return val
-        else:
-            val = 0
-            print('@@@ val b', val)
-            return val
+        val = self.session.vars['values'][Constants.qualities.index(self.seller_quality)]
+        print('@@@ val a', val)
+        return val
 
     def get_payment(self):
         if self.session.vars['retention'] == 0:
             payment = self.initial_payment
             print('@@@ payment a', payment)
             return payment
-        elif self.session.vars['retention'] > 0 and self.seller_accept is not False:
+        else self.session.vars['retention'] > 0:
             payment = self.initial_payment + self.buyer_transfer
             print('@@@ payment b', payment)
-            return payment
-        else:
-            payment = self.initial_payment
-            print('@@@ payment c', payment)
             return payment
 
     def get_winning_seller(self):
